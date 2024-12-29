@@ -1,5 +1,10 @@
-use std::rc::Weak;
-use std::{cell::RefCell, ops::Deref, rc::Rc};
+use alloc::rc::Rc;
+use alloc::rc::Weak;
+use core::{cell::RefCell, ops::Deref};
+
+use alloc::format;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 use sqlite3_parser::ast::{
     DistinctNames, Expr, InsertBody, QualifiedName, ResolveType, ResultColumn, With,
@@ -349,7 +354,7 @@ pub fn translate_insert(
     // Create new rowid if a) not provided by user or b) provided by user but is NULL
     program.emit_insn(Insn::NewRowid {
         cursor: cursor_id,
-        rowid_reg: rowid_reg,
+        rowid_reg,
         prev_largest_reg: 0,
     });
 
@@ -366,7 +371,7 @@ pub fn translate_insert(
         program.emit_insn_with_label_dependency(
             Insn::NotExists {
                 cursor: cursor_id,
-                rowid_reg: rowid_reg,
+                rowid_reg,
                 target_pc: make_record_label,
             },
             make_record_label,

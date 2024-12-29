@@ -1,5 +1,6 @@
-use std::rc::Weak;
-use std::{cell::RefCell, rc::Rc};
+use alloc::rc::Rc;
+use alloc::rc::Weak;
+use core::cell::RefCell;
 
 use super::emitter::emit_program;
 use super::planner::prepare_select_plan;

@@ -1,12 +1,10 @@
 use super::{Buffer, Completion, File, OpenFlags, IO};
 use crate::Result;
 
-use std::{
-    cell::{RefCell, RefMut},
-    collections::BTreeMap,
-    rc::Rc,
-    sync::Arc,
-};
+use alloc::boxed::Box;
+use alloc::string::String;
+use alloc::{collections::BTreeMap, rc::Rc, sync::Arc};
+use core::cell::{RefCell, RefMut};
 
 pub struct MemoryIO {
     pages: RefCell<BTreeMap<usize, MemPage>>,

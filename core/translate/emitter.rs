@@ -1,10 +1,14 @@
 // This module contains code for emitting bytecode instructions for SQL query execution.
 // It handles translating high-level SQL operations into low-level bytecode that can be executed by the virtual machine.
 
-use std::cell::RefCell;
+use alloc::rc::{Rc, Weak};
+use core::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::{Rc, Weak};
 
+use alloc::format;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use sqlite3_parser::ast::{self};
 
 use crate::schema::{Column, PseudoTable, Table};

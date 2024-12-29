@@ -1,5 +1,8 @@
 use super::{Insn, InsnReference, OwnedValue, Program};
-use std::rc::Rc;
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 pub fn insn_to_str(
     program: &Program,

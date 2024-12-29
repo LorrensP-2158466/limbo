@@ -1,5 +1,7 @@
 use super::{AggFunc, BranchOffset, CursorID, FuncCtx, PageIdx};
 use crate::types::OwnedRecord;
+use alloc::string::String;
+use alloc::vec::Vec;
 use limbo_macros::Description;
 
 #[derive(Description, Debug)]

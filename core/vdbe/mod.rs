@@ -24,6 +24,8 @@ pub mod insn;
 pub mod likeop;
 pub mod sorter;
 
+use core::cell::RefCell;
+
 use crate::error::{LimboError, SQLITE_CONSTRAINT_PRIMARYKEY};
 #[cfg(feature = "uuid")]
 use crate::ext::{exec_ts_from_uuid7, exec_uuid, exec_uuidblob, exec_uuidstr, ExtFunc, UuidFunc};
@@ -41,15 +43,18 @@ use crate::vdbe::insn::Insn;
 #[cfg(feature = "json")]
 use crate::{function::JsonFunc, json::get_json, json::json_array, json::json_array_length};
 use crate::{Connection, Result, Rows, TransactionState, DATABASE_VERSION};
+use alloc::borrow::{Borrow, BorrowMut};
+use alloc::boxed::Box;
+use alloc::collections::{BTreeMap, HashMap};
+use alloc::rc::{Rc, Weak};
+use alloc::string::String;
+use alloc::vec::Vec;
+use alloc::{format, vec};
 use datetime::{exec_date, exec_time, exec_unixepoch};
 use likeop::{construct_like_escape_arg, exec_like_with_escape};
 use rand::distributions::{Distribution, Uniform};
 use rand::{thread_rng, Rng};
 use regex::{Regex, RegexBuilder};
-use std::borrow::{Borrow, BorrowMut};
-use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap};
-use std::rc::{Rc, Weak};
 
 pub type BranchOffset = i64;
 pub type CursorID = usize;
@@ -97,7 +102,7 @@ pub struct ProgramState {
     pub pc: BranchOffset,
     cursors: RefCell<BTreeMap<CursorID, Box<dyn Cursor>>>,
     registers: Vec<OwnedValue>,
-    last_compare: Option<std::cmp::Ordering>,
+    last_compare: Option<core::cmp::Ordering>,
     deferred_seek: Option<(CursorID, CursorID)>,
     ended_coroutine: bool, // flag to notify yield coroutine finished
     regex_cache: RegexCache,
@@ -151,6 +156,7 @@ pub struct Program {
 
 impl Program {
     pub fn explain(&self) {
+        // TODO: use write! instead of println!?
         println!("addr  opcode             p1    p2    p3    p4             p5  comment");
         println!("----  -----------------  ----  ----  ----  -------------  --  -------");
         let mut indent_count: usize = 0;
@@ -875,7 +881,7 @@ impl Program {
                         let a = &state.registers[start_reg_a + i];
                         let b = &state.registers[start_reg_b + i];
                         cmp = Some(a.cmp(b));
-                        if cmp != Some(std::cmp::Ordering::Equal) {
+                        if cmp != Some(core::cmp::Ordering::Equal) {
                             break;
                         }
                     }
@@ -894,9 +900,9 @@ impl Program {
                         ));
                     }
                     let target_pc = match cmp.unwrap() {
-                        std::cmp::Ordering::Less => *target_pc_lt,
-                        std::cmp::Ordering::Equal => *target_pc_eq,
-                        std::cmp::Ordering::Greater => *target_pc_gt,
+                        core::cmp::Ordering::Less => *target_pc_lt,
+                        core::cmp::Ordering::Equal => *target_pc_eq,
+                        core::cmp::Ordering::Greater => *target_pc_gt,
                     };
                     assert!(target_pc >= 0);
                     state.pc = target_pc;
@@ -910,7 +916,7 @@ impl Program {
                     let dest_reg = *dest_reg;
                     let count = *count;
                     for i in 0..count {
-                        state.registers[dest_reg + i] = std::mem::replace(
+                        state.registers[dest_reg + i] = core::mem::replace(
                             &mut state.registers[source_reg + i],
                             OwnedValue::Null,
                         );
@@ -2216,7 +2222,7 @@ impl Program {
                             MathFuncArity::Nullary => match math_func {
                                 MathFunc::Pi => {
                                     state.registers[*dest] =
-                                        OwnedValue::Float(std::f64::consts::PI);
+                                        OwnedValue::Float(core::f64::consts::PI);
                                 }
                                 _ => {
                                     unreachable!(
@@ -2639,7 +2645,7 @@ fn exec_sign(reg: &OwnedValue) -> Option<OwnedValue> {
                 return Some(OwnedValue::Null);
             }
         }
-        OwnedValue::Blob(b) => match std::str::from_utf8(b) {
+        OwnedValue::Blob(b) => match alloc::str::from_utf8(b) {
             Ok(s) => {
                 if let Ok(i) = s.parse::<i64>() {
                     i as f64
@@ -3528,9 +3534,10 @@ mod tests {
         exec_unhex, exec_unicode, exec_upper, exec_zeroblob, execute_sqlite_version, get_new_rowid,
         AggContext, Cursor, CursorResult, LimboError, OwnedRecord, OwnedValue, Result,
     };
+    use core::cell::Ref;
     use mockall::{mock, predicate};
     use rand::{rngs::mock::StepRng, thread_rng};
-    use std::{cell::Ref, collections::HashMap, rc::Rc};
+    use std::{boxed::Box, collections::HashMap, rc::Rc, string::String, vec};
 
     mock! {
         Cursor {

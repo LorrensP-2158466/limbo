@@ -1,4 +1,5 @@
 use super::Val;
+use alloc::format;
 
 pub fn get_json_val_by_path<'v>(val: &'v Val, path: &str) -> crate::Result<Option<&'v Val>> {
     match path.strip_prefix('$') {

@@ -1,6 +1,8 @@
 use crate::io::BufferData;
-use std::cell::RefCell;
-use std::pin::Pin;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::cell::RefCell;
+use core::pin::Pin;
 
 pub struct BufferPool {
     pub free_buffers: RefCell<Vec<BufferData>>,

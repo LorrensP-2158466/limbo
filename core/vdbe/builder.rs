@@ -1,8 +1,9 @@
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    rc::{Rc, Weak},
-};
+use alloc::rc::Rc;
+use alloc::rc::Weak;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::cell::RefCell;
+use std::collections::HashMap;
 
 use crate::{storage::sqlite3_ondisk::DatabaseHeader, Connection};
 

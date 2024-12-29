@@ -1,3 +1,4 @@
+use alloc::string::String;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -15,9 +16,9 @@ pub enum LimboError {
     #[error("Conversion error: {0}")]
     ConversionError(String),
     #[error("Env variable error: {0}")]
-    EnvVarError(#[from] std::env::VarError),
+    EnvVarError(#[from] core::env::VarError),
     #[error("I/O error: {0}")]
-    IOError(#[from] std::io::Error),
+    IOError(#[from] alloc::io::Error),
     #[cfg(target_os = "linux")]
     #[error("I/O error: {0}")]
     LinuxIOError(String),
@@ -27,9 +28,9 @@ pub enum LimboError {
     #[error("I/O error: {0}")]
     RustixIOError(#[from] rustix::io::Errno),
     #[error("Parse error: {0}")]
-    ParseIntError(#[from] std::num::ParseIntError),
+    ParseIntError(#[from] core::num::ParseIntError),
     #[error("Parse error: {0}")]
-    ParseFloatError(#[from] std::num::ParseFloatError),
+    ParseFloatError(#[from] core::num::ParseFloatError),
     #[error("Parse error: {0}")]
     InvalidDate(String),
     #[error("Parse error: {0}")]

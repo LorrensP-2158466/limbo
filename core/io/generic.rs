@@ -1,8 +1,8 @@
 use crate::{Completion, File, LimboError, OpenFlags, Result, IO};
+use alloc::cell::RefCell;
+use alloc::io::{Read, Seek, Write};
+use alloc::rc::Rc;
 use log::trace;
-use std::cell::RefCell;
-use std::io::{Read, Seek, Write};
-use std::rc::Rc;
 
 pub struct GenericIO {}
 
@@ -15,7 +15,7 @@ impl GenericIO {
 impl IO for GenericIO {
     fn open_file(&self, path: &str, flags: OpenFlags, _direct: bool) -> Result<Rc<dyn File>> {
         trace!("open_file(path = {})", path);
-        let file = std::fs::OpenOptions::new()
+        let file = alloc::fs::OpenOptions::new()
             .read(true)
             .write(true)
             .create(matches!(flags, OpenFlags::Create))
@@ -41,7 +41,7 @@ impl IO for GenericIO {
 }
 
 pub struct GenericFile {
-    file: RefCell<std::fs::File>,
+    file: RefCell<alloc::fs::File>,
 }
 
 impl File for GenericFile {
@@ -57,7 +57,7 @@ impl File for GenericFile {
 
     fn pread(&self, pos: usize, c: Rc<Completion>) -> Result<()> {
         let mut file = self.file.borrow_mut();
-        file.seek(std::io::SeekFrom::Start(pos as u64))?;
+        file.seek(alloc::io::SeekFrom::Start(pos as u64))?;
         {
             let r = match c.as_ref() {
                 Completion::Read(r) => r,
@@ -78,7 +78,7 @@ impl File for GenericFile {
         c: Rc<Completion>,
     ) -> Result<()> {
         let mut file = self.file.borrow_mut();
-        file.seek(std::io::SeekFrom::Start(pos as u64))?;
+        file.seek(alloc::io::SeekFrom::Start(pos as u64))?;
         let buf = buffer.borrow();
         let buf = buf.as_slice();
         file.write_all(buf)?;

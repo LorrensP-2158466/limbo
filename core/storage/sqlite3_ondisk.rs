@@ -48,11 +48,17 @@ use crate::storage::database::DatabaseStorage;
 use crate::storage::pager::Pager;
 use crate::types::{OwnedRecord, OwnedValue};
 use crate::{File, Result};
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::sync::Arc;
+use alloc::vec;
+use alloc::vec::Vec;
+use core::cell::RefCell;
+use core::pin::Pin;
 use log::trace;
-use std::cell::RefCell;
-use std::pin::Pin;
-use std::rc::Rc;
-use std::sync::{Arc, RwLock};
+use std::sync::RwLock;
 
 use super::pager::PageRef;
 
@@ -263,7 +269,7 @@ fn finish_read_database_header(
 ) -> Result<()> {
     let buf = buf.borrow();
     let buf = buf.as_slice();
-    let mut header = std::cell::RefCell::borrow_mut(&header);
+    let mut header = core::cell::RefCell::borrow_mut(&header);
     header.magic.copy_from_slice(&buf[0..16]);
     header.page_size = u16::from_be_bytes([buf[16], buf[17]]);
     header.write_version = buf[18];
@@ -307,10 +313,10 @@ pub fn begin_write_database_header(header: &DatabaseHeader, pager: &Pager) -> Re
         let buffer: Buffer = buffer.borrow().clone();
         let buffer = Rc::new(RefCell::new(buffer));
         {
-            let mut buf_mut = std::cell::RefCell::borrow_mut(&buffer);
+            let mut buf_mut = core::cell::RefCell::borrow_mut(&buffer);
             let buf = buf_mut.as_mut_slice();
             write_header_to_buf(buf, &header);
-            let mut buffer_to_copy = std::cell::RefCell::borrow_mut(&buffer_to_copy_in_cb);
+            let mut buffer_to_copy = core::cell::RefCell::borrow_mut(&buffer_to_copy_in_cb);
             let buffer_to_copy_slice = buffer_to_copy.as_mut_slice();
 
             buffer_to_copy_slice.copy_from_slice(buf);
@@ -327,7 +333,7 @@ pub fn begin_write_database_header(header: &DatabaseHeader, pager: &Pager) -> Re
     let buffer_in_cb = buffer_to_copy.clone();
     let write_complete = Box::new(move |bytes_written: i32| {
         let buf = buffer_in_cb.clone();
-        let buf_len = std::cell::RefCell::borrow(&buf).len();
+        let buf_len = core::cell::RefCell::borrow(&buf).len();
         if bytes_written < buf_len as i32 {
             log::error!("wrote({bytes_written}) less than expected({buf_len})");
         }
@@ -1375,7 +1381,9 @@ pub fn checksum_wal(
 
 impl WalHeader {
     pub fn as_bytes(&self) -> &[u8] {
-        unsafe { std::mem::transmute::<&WalHeader, &[u8; std::mem::size_of::<WalHeader>()]>(self) }
+        unsafe {
+            core::mem::transmute::<&WalHeader, &[u8; core::mem::size_of::<WalHeader>()]>(self)
+        }
     }
 }
 
@@ -1418,7 +1426,7 @@ mod tests {
     #[case(&[0x12, 0x34, 0x56, 0x78], SerialType::BEInt32, OwnedValue::Integer(0x12345678))]
     #[case(&[0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC], SerialType::BEInt48, OwnedValue::Integer(0x123456789ABC))]
     #[case(&[0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xFF], SerialType::BEInt64, OwnedValue::Integer(0x123456789ABCDEFF))]
-    #[case(&[64, 9, 33, 251, 84, 68, 45, 24], SerialType::BEFloat64, OwnedValue::Float(std::f64::consts::PI))]
+    #[case(&[64, 9, 33, 251, 84, 68, 45, 24], SerialType::BEFloat64, OwnedValue::Float(core::f64::consts::PI))]
     #[case(&[], SerialType::ConstInt0, OwnedValue::Integer(0))]
     #[case(&[], SerialType::ConstInt1, OwnedValue::Integer(1))]
     #[case(&[1, 2, 3], SerialType::Blob(3), OwnedValue::Blob(vec![1, 2, 3].into()))]

@@ -1,7 +1,10 @@
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::vec::Vec;
 use chrono::{
     DateTime, Datelike, NaiveDate, NaiveDateTime, NaiveTime, TimeDelta, TimeZone, Timelike, Utc,
 };
-use std::rc::Rc;
 
 use crate::types::OwnedValue;
 use crate::LimboError::InvalidModifier;
@@ -395,7 +398,7 @@ fn parse_modifier(modifier: &str) -> Result<Modifier> {
 
 #[cfg(test)]
 mod tests {
-    use std::rc::Rc;
+    use alloc::rc::Rc;
 
     use super::*;
 

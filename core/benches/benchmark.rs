@@ -1,14 +1,14 @@
+use alloc::sync::Arc;
 use criterion::{criterion_group, criterion_main, Criterion, Throughput};
 use limbo_core::{Database, PlatformIO, IO};
 use pprof::criterion::{Output, PProfProfiler};
-use std::sync::Arc;
 
 fn bench(c: &mut Criterion) {
     limbo_bench(c);
 
     // https://github.com/penberg/limbo/issues/174
     // The rusqlite benchmark crashes on Mac M1 when using the flamegraph features
-    if std::env::var("DISABLE_RUSQLITE_BENCHMARK").is_ok() {
+    if alloc::env::var("DISABLE_RUSQLITE_BENCHMARK").is_ok() {
         return;
     }
 

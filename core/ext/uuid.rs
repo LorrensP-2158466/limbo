@@ -3,7 +3,7 @@ use crate::{
     types::{LimboText, OwnedValue},
     LimboError,
 };
-use std::rc::Rc;
+use alloc::rc::Rc;
 use uuid::{ContextV7, Timestamp, Uuid};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -32,8 +32,8 @@ impl UuidFunc {
     }
 }
 
-impl std::fmt::Display for UuidFunc {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl alloc::fmt::Display for UuidFunc {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         match self {
             Self::Uuid4Str => write!(f, "uuid4_str"),
             Self::Uuid4 => write!(f, "uuid4"),

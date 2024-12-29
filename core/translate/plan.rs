@@ -1,9 +1,9 @@
-use core::fmt;
-use sqlite3_parser::ast;
-use std::{
+use alloc::{
     fmt::{Display, Formatter},
     rc::Rc,
 };
+use core::fmt;
+use sqlite3_parser::ast;
 
 use crate::translate::plan::Plan::{Delete, Select};
 use crate::{
@@ -11,6 +11,11 @@ use crate::{
     schema::{BTreeTable, Column, Index},
     Result,
 };
+
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 #[derive(Debug)]
 pub struct ResultSetColumn {
@@ -78,7 +83,7 @@ pub struct DeletePlan {
 }
 
 impl Display for Plan {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> alloc::fmt::Result {
         match self {
             Select(select_plan) => write!(f, "{}", select_plan.source),
             Delete(delete_plan) => write!(f, "{}", delete_plan.source),

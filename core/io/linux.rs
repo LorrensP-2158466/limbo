@@ -3,11 +3,11 @@ use crate::{LimboError, Result};
 use libc::{c_short, fcntl, flock, iovec, F_SETLK};
 use log::{debug, trace};
 use nix::fcntl::{FcntlArg, OFlag};
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::fmt;
-use std::os::unix::io::AsRawFd;
-use std::rc::Rc;
+use alloc::cell::RefCell;
+use alloc::collections::HashMap;
+use alloc::fmt;
+use alloc::os::unix::io::AsRawFd;
+use alloc::rc::Rc;
 use thiserror::Error;
 
 const MAX_IOVECS: usize = 128;
@@ -58,7 +58,7 @@ impl LinuxIO {
                 key: 0,
             },
             iovecs: [iovec {
-                iov_base: std::ptr::null_mut(),
+                iov_base: alloc::ptr::null_mut(),
                 iov_len: 0,
             }; MAX_IOVECS],
             next_iovec: 0,
@@ -72,7 +72,7 @@ impl LinuxIO {
 impl InnerLinuxIO {
     pub fn get_iovec(&mut self, buf: *const u8, len: usize) -> &iovec {
         let iovec = &mut self.iovecs[self.next_iovec];
-        iovec.iov_base = buf as *mut std::ffi::c_void;
+        iovec.iov_base = buf as *mut alloc::ffi::c_void;
         iovec.iov_len = len;
         self.next_iovec = (self.next_iovec + 1) % MAX_IOVECS;
         iovec
@@ -121,7 +121,7 @@ impl WrappedIOUring {
 impl IO for LinuxIO {
     fn open_file(&self, path: &str, flags: OpenFlags, direct: bool) -> Result<Rc<dyn File>> {
         trace!("open_file(path = {})", path);
-        let file = std::fs::File::options()
+        let file = alloc::fs::File::options()
             .read(true)
             .write(true)
             .create(matches!(flags, OpenFlags::Create))
@@ -139,7 +139,7 @@ impl IO for LinuxIO {
             io: self.inner.clone(),
             file,
         });
-        if std::env::var(common::ENV_DISABLE_FILE_LOCK).is_err() {
+        if alloc::env::var(common::ENV_DISABLE_FILE_LOCK).is_err() {
             linux_file.lock_file(true)?;
         }
         Ok(linux_file)
@@ -186,7 +186,7 @@ impl IO for LinuxIO {
 
 pub struct LinuxFile {
     io: Rc<RefCell<InnerLinuxIO>>,
-    file: std::fs::File,
+    file: alloc::fs::File,
 }
 
 impl File for LinuxFile {
@@ -208,8 +208,8 @@ impl File for LinuxFile {
         // or the process exits or after an explicit unlock.
         let lock_result = unsafe { fcntl(fd, F_SETLK, &flock) };
         if lock_result == -1 {
-            let err = std::io::Error::last_os_error();
-            if err.kind() == std::io::ErrorKind::WouldBlock {
+            let err = alloc::io::Error::last_os_error();
+            if err.kind() == alloc::io::ErrorKind::WouldBlock {
                 return Err(LimboError::LockingError(
                     "File is locked by another process".into(),
                 ));
@@ -234,7 +234,7 @@ impl File for LinuxFile {
         if unlock_result == -1 {
             return Err(LimboError::LockingError(format!(
                 "Failed to release file lock: {}",
-                std::io::Error::last_os_error()
+                alloc::io::Error::last_os_error()
             )));
         }
         Ok(())

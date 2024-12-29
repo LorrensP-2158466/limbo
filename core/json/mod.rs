@@ -3,11 +3,11 @@ mod error;
 mod path;
 mod ser;
 
-use std::rc::Rc;
-
 pub use crate::json::de::from_str;
 pub use crate::json::ser::to_string;
 use crate::types::{LimboText, OwnedValue, TextSubtype};
+use alloc::format;
+use alloc::{rc::Rc, string::String, vec::Vec};
 use indexmap::IndexMap;
 use path::get_json_val_by_path;
 use serde::{Deserialize, Serialize};

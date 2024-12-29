@@ -1,4 +1,9 @@
 use crate::{util::normalize_ident, Result};
+use alloc::collections::HashMap;
+use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
 use core::fmt;
 use fallible_iterator::FallibleIterator;
 use log::trace;
@@ -7,8 +12,6 @@ use sqlite3_parser::{
     ast::{Cmd, CreateTableBody, QualifiedName, ResultColumn, Stmt},
     lexer::sql::Parser,
 };
-use std::collections::HashMap;
-use std::rc::Rc;
 
 pub struct Schema {
     pub tables: HashMap<String, Rc<BTreeTable>>,
@@ -186,6 +189,8 @@ impl BTreeTable {
 
     #[cfg(test)]
     pub fn to_sql(&self) -> String {
+        use alloc::format;
+
         let mut sql = format!("CREATE TABLE {} (\n", self.name);
         for (i, column) in self.columns.iter().enumerate() {
             if i > 0 {

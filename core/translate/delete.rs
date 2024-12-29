@@ -3,9 +3,10 @@ use crate::translate::optimizer::optimize_plan;
 use crate::translate::planner::prepare_delete_plan;
 use crate::{schema::Schema, storage::sqlite3_ondisk::DatabaseHeader, vdbe::Program};
 use crate::{Connection, Result};
+use alloc::rc::Rc;
+use alloc::rc::Weak;
+use core::cell::RefCell;
 use sqlite3_parser::ast::{Expr, Limit, QualifiedName};
-use std::rc::Weak;
-use std::{cell::RefCell, rc::Rc};
 
 pub fn translate_delete(
     schema: &Schema,

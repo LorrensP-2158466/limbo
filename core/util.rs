@@ -1,4 +1,4 @@
-use std::{rc::Rc, sync::Arc};
+use alloc::{rc::Rc, string::String, sync::Arc};
 
 use sqlite3_parser::ast::{Expr, FunctionTail, Literal};
 
@@ -285,6 +285,7 @@ pub fn exprs_are_equivalent(expr1: &Expr, expr2: &Expr) -> bool {
 #[cfg(test)]
 pub mod tests {
     use super::*;
+    use alloc::{boxed::Box, vec};
     use sqlite3_parser::ast::{self, Expr, Id, Literal, Operator::*, Type};
 
     #[test]

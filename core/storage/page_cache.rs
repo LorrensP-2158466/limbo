@@ -1,4 +1,7 @@
-use std::{cell::RefCell, collections::HashMap, ptr::NonNull};
+use alloc::boxed::Box;
+use alloc::vec::Vec;
+use core::{cell::RefCell, ptr::NonNull};
+use std::collections::HashMap;
 
 use log::debug;
 
@@ -93,7 +96,7 @@ impl DumbLruPageCache {
             let ptr = unsafe { ptr.as_mut() };
             self.detach(ptr, clean_page);
         }
-        unsafe { std::ptr::drop_in_place(ptr.as_ptr()) };
+        unsafe { core::ptr::drop_in_place(ptr.as_ptr()) };
     }
 
     fn get_ptr(&mut self, key: &PageCacheKey) -> Option<NonNull<PageCacheEntry>> {

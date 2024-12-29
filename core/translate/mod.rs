@@ -22,14 +22,16 @@ use crate::storage::sqlite3_ondisk::{DatabaseHeader, MIN_PAGE_CACHE_SIZE};
 use crate::translate::delete::translate_delete;
 use crate::vdbe::{builder::ProgramBuilder, insn::Insn, Program};
 use crate::{bail_parse_error, Connection, Result};
+use alloc::fmt::Display;
+use alloc::format;
+use alloc::rc::{Rc, Weak};
+use alloc::str::FromStr;
+use alloc::string::String;
+use core::cell::RefCell;
 use insert::translate_insert;
 use select::translate_select;
 use sqlite3_parser::ast::fmt::ToTokens;
 use sqlite3_parser::ast::{self, PragmaName};
-use std::cell::RefCell;
-use std::fmt::Display;
-use std::rc::{Rc, Weak};
-use std::str::FromStr;
 
 /// Translate SQL statement into bytecode program.
 pub fn translate(
@@ -449,7 +451,7 @@ struct TableFormatter<'a> {
     body: &'a ast::CreateTableBody,
 }
 impl Display for TableFormatter<'_> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         self.body.to_fmt(f)
     }
 }

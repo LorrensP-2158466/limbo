@@ -1,13 +1,13 @@
 use crate::Result;
+use alloc::boxed::Box;
+use alloc::fmt;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
+use alloc::{fmt::Debug, rc::Rc};
 use cfg_block::cfg_block;
-use std::fmt;
-use std::{
-    cell::{Ref, RefCell, RefMut},
-    fmt::Debug,
-    mem::ManuallyDrop,
-    pin::Pin,
-    rc::Rc,
-};
+use core::cell::{Ref, RefCell, RefMut};
+use core::{mem::ManuallyDrop, pin::Pin};
 
 pub trait File {
     fn lock_file(&self, exclusive: bool) -> Result<()>;

@@ -2,8 +2,9 @@ use crate::{
     types::{Cursor, CursorResult, OwnedRecord, OwnedValue, SeekKey, SeekOp},
     Result,
 };
-use std::cell::{Ref, RefCell};
-use std::cmp::Ordering;
+use alloc::vec::Vec;
+use core::cell::{Ref, RefCell};
+use core::cmp::Ordering;
 
 pub struct Sorter {
     records: Vec<OwnedRecord>,

@@ -1,3 +1,6 @@
+#![cfg_attr(not(test), no_std)]
+
+extern crate alloc;
 mod error;
 mod ext;
 mod function;
@@ -17,15 +20,20 @@ mod vdbe;
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::rc::Weak;
+use alloc::string::String;
+use alloc::sync::{Arc, OnceLock, RwLock};
+use alloc::vec::Vec;
+use core::cell::Cell;
+use core::cell::RefCell;
 use fallible_iterator::FallibleIterator;
 use log::trace;
 use schema::Schema;
 use sqlite3_parser::ast;
 use sqlite3_parser::{ast::Cmd, lexer::sql::Parser};
-use std::cell::Cell;
-use std::sync::Weak;
-use std::sync::{Arc, OnceLock, RwLock};
-use std::{cell::RefCell, rc::Rc};
 use storage::btree::btree_init_page;
 #[cfg(feature = "fs")]
 use storage::database::FileStorage;
@@ -39,7 +47,7 @@ use util::parse_schema_rows;
 use translate::planner::prepare_select_plan;
 
 pub use error::LimboError;
-pub type Result<T> = std::result::Result<T, error::LimboError>;
+pub type Result<T> = core::result::Result<T, error::LimboError>;
 
 use crate::translate::optimizer::optimize_plan;
 pub use io::OpenFlags;
@@ -272,7 +280,7 @@ impl Connection {
                         ast::Stmt::Select(select) => {
                             let plan = prepare_select_plan(&self.schema.borrow(), select)?;
                             let plan = optimize_plan(plan)?;
-                            println!("{}", plan);
+                            // println!("{}", plan);
                         }
                         _ => todo!(),
                     }

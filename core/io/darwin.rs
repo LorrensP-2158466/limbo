@@ -3,16 +3,18 @@ use crate::io::common;
 use crate::Result;
 
 use super::{Completion, File, OpenFlags, IO};
+use alloc::format;
+use alloc::rc::Rc;
+use alloc::string::String;
+use core::cell::RefCell;
 use libc::{c_short, fcntl, flock, F_SETLK};
 use log::trace;
 use polling::{Event, Events, Poller};
 use rustix::fd::{AsFd, AsRawFd};
 use rustix::fs::OpenOptionsExt;
 use rustix::io::Errno;
-use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::{Read, Seek, Write};
-use std::rc::Rc;
 
 pub struct DarwinIO {
     poller: Rc<RefCell<Poller>>,
@@ -74,19 +76,19 @@ impl IO for DarwinIO {
                                 _ => unreachable!(),
                             };
                             let mut buf = r.buf_mut();
-                            file.seek(std::io::SeekFrom::Start(pos as u64))?;
+                            file.seek(alloc::io::SeekFrom::Start(pos as u64))?;
                             file.read(buf.as_mut_slice())
                         }
                         CompletionCallback::Write(ref file, _, ref buf, pos) => {
                             let mut file = file.borrow_mut();
                             let buf = buf.borrow();
-                            file.seek(std::io::SeekFrom::Start(pos as u64))?;
+                            file.seek(alloc::io::SeekFrom::Start(pos as u64))?;
                             file.write(buf.as_slice())
                         }
                     }
                 };
                 match result {
-                    std::result::Result::Ok(n) => {
+                    core::result::Result::Ok(n) => {
                         match &cf {
                             CompletionCallback::Read(_, ref c, _) => {
                                 c.complete(0);
@@ -118,9 +120,9 @@ impl IO for DarwinIO {
 }
 
 enum CompletionCallback {
-    Read(Rc<RefCell<std::fs::File>>, Rc<Completion>, usize),
+    Read(Rc<RefCell<alloc::fs::File>>, Rc<Completion>, usize),
     Write(
-        Rc<RefCell<std::fs::File>>,
+        Rc<RefCell<alloc::fs::File>>,
         Rc<Completion>,
         Rc<RefCell<crate::Buffer>>,
         usize,
@@ -128,7 +130,7 @@ enum CompletionCallback {
 }
 
 pub struct DarwinFile {
-    file: Rc<RefCell<std::fs::File>>,
+    file: Rc<RefCell<alloc::fs::File>>,
     poller: Rc<RefCell<polling::Poller>>,
     callbacks: Rc<RefCell<HashMap<usize, CompletionCallback>>>,
 }
@@ -152,8 +154,8 @@ impl File for DarwinFile {
         // or the process exits or after an explicit unlock.
         let lock_result = unsafe { fcntl(fd, F_SETLK, &flock) };
         if lock_result == -1 {
-            let err = std::io::Error::last_os_error();
-            if err.kind() == std::io::ErrorKind::WouldBlock {
+            let err = alloc::io::Error::last_os_error();
+            if err.kind() == alloc::io::ErrorKind::WouldBlock {
                 return Err(LimboError::LockingError(
                     "Failed locking file. File is locked by another process".to_string(),
                 ));
@@ -181,7 +183,7 @@ impl File for DarwinFile {
         if unlock_result == -1 {
             return Err(LimboError::LockingError(format!(
                 "Failed to release file lock: {}",
-                std::io::Error::last_os_error()
+                alloc::io::Error::last_os_error()
             )));
         }
         Ok(())
@@ -198,7 +200,7 @@ impl File for DarwinFile {
             rustix::io::pread(file.as_fd(), buf.as_mut_slice(), pos as u64)
         };
         match result {
-            std::result::Result::Ok(n) => {
+            core::result::Result::Ok(n) => {
                 trace!("pread n: {}", n);
                 // Read succeeded immediately
                 c.complete(0);
@@ -235,7 +237,7 @@ impl File for DarwinFile {
             rustix::io::pwrite(file.as_fd(), buf.as_slice(), pos as u64)
         };
         match result {
-            std::result::Result::Ok(n) => {
+            core::result::Result::Ok(n) => {
                 trace!("pwrite n: {}", n);
                 // Read succeeded immediately
                 c.complete(n as i32);
@@ -264,7 +266,7 @@ impl File for DarwinFile {
         let file = self.file.borrow();
         let result = rustix::fs::fsync(file.as_fd());
         match result {
-            std::result::Result::Ok(()) => {
+            core::result::Result::Ok(()) => {
                 trace!("fsync");
                 c.complete(0);
                 Ok(())

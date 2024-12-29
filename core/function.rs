@@ -1,6 +1,6 @@
 use crate::ext::ExtFunc;
-use std::fmt;
-use std::fmt::Display;
+use alloc::fmt;
+use alloc::fmt::Display;
 #[cfg(feature = "json")]
 #[derive(Debug, Clone, PartialEq)]
 pub enum JsonFunc {
@@ -96,7 +96,7 @@ pub enum ScalarFunc {
 }
 
 impl Display for ScalarFunc {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         let str = match self {
             Self::Cast => "cast".to_string(),
             Self::Char => "char".to_string(),
@@ -219,7 +219,7 @@ impl MathFunc {
 }
 
 impl Display for MathFunc {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         let str = match self {
             Self::Acos => "acos".to_string(),
             Self::Acosh => "acosh".to_string(),

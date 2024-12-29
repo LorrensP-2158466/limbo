@@ -4,12 +4,13 @@ use crate::storage::database::DatabaseStorage;
 use crate::storage::sqlite3_ondisk::{self, DatabaseHeader, PageContent};
 use crate::storage::wal::Wal;
 use crate::{Buffer, Result};
+use alloc::rc::Rc;
+use alloc::sync::{Arc, RwLock};
+use alloc::vec::Vec;
+use core::cell::{RefCell, UnsafeCell};
+use core::sync::atomic::{AtomicUsize, Ordering};
 use log::trace;
-use std::cell::{RefCell, UnsafeCell};
 use std::collections::HashSet;
-use std::rc::Rc;
-use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, RwLock};
 
 use super::page_cache::{DumbLruPageCache, PageCacheKey};
 use super::wal::{CheckpointMode, CheckpointStatus};

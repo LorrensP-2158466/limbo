@@ -8,6 +8,12 @@ use crate::{
     util::{exprs_are_equivalent, normalize_ident},
     Result,
 };
+
+use alloc::boxed::Box;
+use alloc::format;
+use alloc::vec;
+use alloc::vec::Vec;
+
 use sqlite3_parser::ast::{self, Expr, FromClause, JoinType, Limit, QualifiedName, ResultColumn};
 
 pub struct OperatorIdCounter {

@@ -1,11 +1,12 @@
+use alloc::fmt::{self, Display};
+use alloc::string::String;
 use pest::Span;
 use serde::{de, ser};
-use std::fmt::{self, Display};
 
 use crate::json::de::Rule;
 
 /// Alias for a `Result` with error type `json5::Error`
-pub type Result<T> = std::result::Result<T, Error>;
+pub type Result<T> = core::result::Result<T, Error>;
 
 /// One-based line and column at which the error was detected.
 #[derive(Clone, Debug, PartialEq)]
@@ -59,8 +60,8 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl From<std::str::Utf8Error> for Error {
-    fn from(err: std::str::Utf8Error) -> Self {
+impl From<alloc::str::Utf8Error> for Error {
+    fn from(err: alloc::str::Utf8Error) -> Self {
         Self::Message {
             msg: err.to_string(),
             location: None,
@@ -94,7 +95,7 @@ impl Display for Error {
     }
 }
 
-impl std::error::Error for Error {}
+impl core::error::Error for Error {}
 
 /// Adds location information from `span`, if `res` is an error.
 pub fn set_location<T>(res: &mut Result<T>, span: &Span<'_>) {

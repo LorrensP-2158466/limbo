@@ -1,5 +1,9 @@
-use std::fmt::Display;
-use std::{cell::Ref, rc::Rc};
+use alloc::boxed::Box;
+use alloc::fmt::Display;
+use alloc::rc::Rc;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::cell::Ref;
 
 use crate::error::LimboError;
 use crate::Result;
@@ -16,7 +20,7 @@ pub enum Value<'a> {
 }
 
 impl<'a> Display for Value<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         match self {
             Self::Null => write!(f, "NULL"),
             Self::Integer(i) => write!(f, "{}", i),
@@ -74,7 +78,7 @@ impl OwnedValue {
 }
 
 impl Display for OwnedValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         match self {
             Self::Null => write!(f, "NULL"),
             Self::Integer(i) => write!(f, "{}", i),
@@ -121,7 +125,7 @@ impl AggContext {
 
 #[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd<OwnedValue> for OwnedValue {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         match (self, other) {
             (Self::Integer(int_left), Self::Integer(int_right)) => int_left.partial_cmp(int_right),
             (Self::Integer(int_left), Self::Float(float_right)) => {
@@ -135,23 +139,23 @@ impl PartialOrd<OwnedValue> for OwnedValue {
             }
             // Numeric vs Text/Blob
             (Self::Integer(_) | Self::Float(_), Self::Text(_) | Self::Blob(_)) => {
-                Some(std::cmp::Ordering::Less)
+                Some(core::cmp::Ordering::Less)
             }
             (Self::Text(_) | Self::Blob(_), Self::Integer(_) | Self::Float(_)) => {
-                Some(std::cmp::Ordering::Greater)
+                Some(core::cmp::Ordering::Greater)
             }
 
             (Self::Text(text_left), Self::Text(text_right)) => {
                 text_left.value.partial_cmp(&text_right.value)
             }
             // Text vs Blob
-            (Self::Text(_), Self::Blob(_)) => Some(std::cmp::Ordering::Less),
-            (Self::Blob(_), Self::Text(_)) => Some(std::cmp::Ordering::Greater),
+            (Self::Text(_), Self::Blob(_)) => Some(core::cmp::Ordering::Less),
+            (Self::Blob(_), Self::Text(_)) => Some(core::cmp::Ordering::Greater),
 
             (Self::Blob(blob_left), Self::Blob(blob_right)) => blob_left.partial_cmp(blob_right),
-            (Self::Null, Self::Null) => Some(std::cmp::Ordering::Equal),
-            (Self::Null, _) => Some(std::cmp::Ordering::Less),
-            (_, Self::Null) => Some(std::cmp::Ordering::Greater),
+            (Self::Null, Self::Null) => Some(core::cmp::Ordering::Equal),
+            (Self::Null, _) => Some(core::cmp::Ordering::Less),
+            (_, Self::Null) => Some(core::cmp::Ordering::Greater),
             (Self::Agg(a), Self::Agg(b)) => a.partial_cmp(b),
             (Self::Agg(a), other) => a.final_value().partial_cmp(other),
             (other, Self::Agg(b)) => other.partial_cmp(b.final_value()),
@@ -160,8 +164,8 @@ impl PartialOrd<OwnedValue> for OwnedValue {
     }
 }
 
-impl std::cmp::PartialOrd<AggContext> for AggContext {
-    fn partial_cmp(&self, other: &AggContext) -> Option<std::cmp::Ordering> {
+impl core::cmp::PartialOrd<AggContext> for AggContext {
+    fn partial_cmp(&self, other: &AggContext) -> Option<core::cmp::Ordering> {
         match (self, other) {
             (Self::Avg(a, _), Self::Avg(b, _)) => a.partial_cmp(b),
             (Self::Sum(a), Self::Sum(b)) => a.partial_cmp(b),
@@ -174,15 +178,15 @@ impl std::cmp::PartialOrd<AggContext> for AggContext {
     }
 }
 
-impl std::cmp::Eq for OwnedValue {}
+impl core::cmp::Eq for OwnedValue {}
 
-impl std::cmp::Ord for OwnedValue {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+impl core::cmp::Ord for OwnedValue {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.partial_cmp(other).unwrap()
     }
 }
 
-impl std::ops::Add<OwnedValue> for OwnedValue {
+impl core::ops::Add<OwnedValue> for OwnedValue {
     type Output = OwnedValue;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -223,7 +227,7 @@ impl std::ops::Add<OwnedValue> for OwnedValue {
     }
 }
 
-impl std::ops::Add<f64> for OwnedValue {
+impl core::ops::Add<f64> for OwnedValue {
     type Output = OwnedValue;
 
     fn add(self, rhs: f64) -> Self::Output {
@@ -235,7 +239,7 @@ impl std::ops::Add<f64> for OwnedValue {
     }
 }
 
-impl std::ops::Add<i64> for OwnedValue {
+impl core::ops::Add<i64> for OwnedValue {
     type Output = OwnedValue;
 
     fn add(self, rhs: i64) -> Self::Output {
@@ -247,25 +251,25 @@ impl std::ops::Add<i64> for OwnedValue {
     }
 }
 
-impl std::ops::AddAssign for OwnedValue {
+impl core::ops::AddAssign for OwnedValue {
     fn add_assign(&mut self, rhs: Self) {
         *self = self.clone() + rhs;
     }
 }
 
-impl std::ops::AddAssign<i64> for OwnedValue {
+impl core::ops::AddAssign<i64> for OwnedValue {
     fn add_assign(&mut self, rhs: i64) {
         *self = self.clone() + rhs;
     }
 }
 
-impl std::ops::AddAssign<f64> for OwnedValue {
+impl core::ops::AddAssign<f64> for OwnedValue {
     fn add_assign(&mut self, rhs: f64) {
         *self = self.clone() + rhs;
     }
 }
 
-impl std::ops::Div<OwnedValue> for OwnedValue {
+impl core::ops::Div<OwnedValue> for OwnedValue {
     type Output = OwnedValue;
 
     fn div(self, rhs: OwnedValue) -> Self::Output {
@@ -287,7 +291,7 @@ impl std::ops::Div<OwnedValue> for OwnedValue {
     }
 }
 
-impl std::ops::DivAssign<OwnedValue> for OwnedValue {
+impl core::ops::DivAssign<OwnedValue> for OwnedValue {
     fn div_assign(&mut self, rhs: OwnedValue) {
         *self = self.clone() / rhs;
     }
@@ -498,7 +502,7 @@ impl OwnedRecord {
             // if( nVarint<sqlite3VarintLen(nHdr) ) nHdr++;
         }
         assert!(header_size <= 126);
-        header_bytes_buf.extend(std::iter::repeat(0).take(9));
+        header_bytes_buf.extend(core::iter::repeat(0).take(9));
         let n = write_varint(header_bytes_buf.as_mut_slice(), header_size as u64);
         header_bytes_buf.truncate(n);
         buf.splice(initial_i..initial_i, header_bytes_buf.iter().cloned());
@@ -552,7 +556,7 @@ pub trait Cursor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::rc::Rc;
+    use alloc::rc::Rc;
 
     #[test]
     fn test_serialize_null() {

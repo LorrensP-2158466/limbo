@@ -10,6 +10,11 @@ use crate::util::{exprs_are_equivalent, normalize_ident};
 use crate::vdbe::{builder::ProgramBuilder, insn::Insn, BranchOffset};
 use crate::Result;
 
+use alloc::format;
+use alloc::string::String;
+use alloc::vec;
+use alloc::vec::Vec;
+
 use super::plan::{Aggregate, BTreeTableReference};
 
 #[derive(Default, Debug, Clone, Copy)]
@@ -1943,7 +1948,7 @@ pub fn translate_expr(
                     .map(|pair| {
                         // We assume that sqlite3-parser has already validated that
                         // the input is valid hex string, thus unwrap is safe.
-                        let hex_byte = std::str::from_utf8(pair).unwrap();
+                        let hex_byte = alloc::str::from_utf8(pair).unwrap();
                         u8::from_str_radix(hex_byte, 16).unwrap()
                     })
                     .collect();

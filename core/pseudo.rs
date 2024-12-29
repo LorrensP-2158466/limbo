@@ -2,7 +2,7 @@ use crate::{
     types::{SeekKey, SeekOp},
     Result,
 };
-use std::cell::{Ref, RefCell};
+use core::cell::{Ref, RefCell};
 
 use crate::types::{Cursor, CursorResult, OwnedRecord, OwnedValue};
 

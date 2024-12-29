@@ -8,9 +8,10 @@ use crate::storage::sqlite3_ondisk::{
 use crate::types::{Cursor, CursorResult, OwnedRecord, OwnedValue, SeekKey, SeekOp};
 use crate::Result;
 
-use std::cell::{Ref, RefCell};
-use std::pin::Pin;
-use std::rc::Rc;
+use alloc::rc::Rc;
+use alloc::vec::Vec;
+use core::cell::{Ref, RefCell};
+use core::pin::Pin;
 
 use super::pager::PageRef;
 use super::sqlite3_ondisk::{
@@ -1148,7 +1149,7 @@ impl BTreeCursor {
                         };
                         let mut divider_cell = Vec::new();
                         divider_cell.extend_from_slice(&(page.get().id as u32).to_be_bytes());
-                        divider_cell.extend(std::iter::repeat(0).take(9));
+                        divider_cell.extend(core::iter::repeat(0).take(9));
                         let n = write_varint(&mut divider_cell.as_mut_slice()[4..], key);
                         divider_cell.truncate(4 + n);
                         let parent_cell_idx = self.find_cell(parent_contents, key);
@@ -1224,7 +1225,7 @@ impl BTreeCursor {
                 let child = page_ref.clone();
 
                 // Swap the entire Page structs
-                std::mem::swap(&mut child.get().id, &mut new_root_page.get().id);
+                core::mem::swap(&mut child.get().id, &mut new_root_page.get().id);
                 // TODO:: shift bytes by offset to left on child because now child has offset 100
                 // and header bytes
                 // Also change the offset of page
@@ -1556,7 +1557,7 @@ impl BTreeCursor {
 
         loop {
             let to_copy = space_left.min(to_copy_buffer.len());
-            unsafe { std::ptr::copy(to_copy_buffer.as_ptr(), pointer, to_copy) };
+            unsafe { core::ptr::copy(to_copy_buffer.as_ptr(), pointer, to_copy) };
 
             let left = to_copy_buffer.len() - to_copy;
             if left == 0 {
@@ -1574,7 +1575,7 @@ impl BTreeCursor {
                 let buf = contents.as_ptr();
                 let as_bytes = id.to_be_bytes();
                 // update pointer to new overflow page
-                unsafe { std::ptr::copy(as_bytes.as_ptr(), pointer_to_next, 4) };
+                unsafe { core::ptr::copy(as_bytes.as_ptr(), pointer_to_next, 4) };
 
                 pointer = unsafe { buf.as_mut_ptr().add(4) };
                 pointer_to_next = buf.as_mut_ptr();
@@ -1886,6 +1887,7 @@ impl Cursor for BTreeCursor {
     }
 
     fn delete(&mut self) -> Result<CursorResult<()>> {
+        // TODO: println in btree delete? dont know how to circumvent with no_std
         println!("rowid: {:?}", self.rowid.borrow());
         Ok(CursorResult::Ok(()))
     }
@@ -1975,5 +1977,5 @@ pub fn btree_init_page(
 }
 
 fn to_static_buf(buf: &[u8]) -> &'static [u8] {
-    unsafe { std::mem::transmute::<&[u8], &'static [u8]>(buf) }
+    unsafe { core::mem::transmute::<&[u8], &'static [u8]>(buf) }
 }

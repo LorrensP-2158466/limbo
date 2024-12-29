@@ -1,4 +1,7 @@
-use std::rc::Rc;
+use alloc::boxed::Box;
+use alloc::rc::Rc;
+use alloc::vec;
+use alloc::vec::Vec;
 
 use sqlite3_parser::ast;
 
@@ -943,12 +946,12 @@ trait TakeOwnership {
 
 impl TakeOwnership for ast::Expr {
     fn take_ownership(&mut self) -> Self {
-        std::mem::replace(self, ast::Expr::Literal(ast::Literal::Null))
+        core::mem::replace(self, ast::Expr::Literal(ast::Literal::Null))
     }
 }
 
 impl TakeOwnership for SourceOperator {
     fn take_ownership(&mut self) -> Self {
-        std::mem::replace(self, Self::Nothing)
+        core::mem::replace(self, Self::Nothing)
     }
 }

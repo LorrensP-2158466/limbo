@@ -1,3 +1,4 @@
+use alloc::string::String;
 use regex::{Regex, RegexBuilder};
 
 use crate::{types::OwnedValue, LimboError};

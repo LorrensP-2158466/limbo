@@ -1,5 +1,11 @@
+use core::num::FpCategory;
+
+use alloc::{
+    format,
+    string::{String, ToString},
+    vec,
+};
 use serde::ser::{self, Serialize};
-use std::{f32, f64, num::FpCategory};
 
 use crate::json::error::{Error, Result};
 

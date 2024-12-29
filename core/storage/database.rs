@@ -1,5 +1,6 @@
 use crate::{error::LimboError, io::Completion, Buffer, Result};
-use std::{cell::RefCell, rc::Rc};
+use alloc::rc::Rc;
+use core::cell::RefCell;
 
 /// DatabaseStorage is an interface a database file that consists of pages.
 ///

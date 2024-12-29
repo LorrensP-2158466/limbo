@@ -10,8 +10,8 @@ pub enum ExtFunc {
 }
 
 #[allow(unreachable_patterns)] // TODO: remove when more extension funcs added
-impl std::fmt::Display for ExtFunc {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl alloc::fmt::Display for ExtFunc {
+    fn fmt(&self, f: &mut alloc::fmt::Formatter<'_>) -> alloc::fmt::Result {
         match self {
             #[cfg(feature = "uuid")]
             Self::Uuid(uuidfn) => write!(f, "{}", uuidfn),
